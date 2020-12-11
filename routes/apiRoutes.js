@@ -1,34 +1,59 @@
 // ===============================================================================
-// LOAD DATA
-// Link our routes to data sources.
+//  routes to data sources.
 // ===============================================================================
-
-var notesData = require("../db/db");
-
+const notesData = require("../db/db.json");
+const fs = require("fs");
+const path = require("path");
+const { v4: uuidv4 } = require("uuid");
 // ===============================================================================
 // ROUTING
 // ===============================================================================
 
 module.exports = function (app) {
-  // API GET Requests
-  // Below code handles when users "visit" a page.
-  // In each of the below cases when a user visits a link
+  //notes variable set up
+  const notes = JSON.parse(
+    fs.readFileSync(path.join(__dirname, "../db/db.json"), "utf-8")
+  );
+  //  /api/notes get request
+  // handles the get request from the client, reads and sends the db.JOSN data of saved notes.
 
   app.get("/api/notes", function (req, res) {
-    res.json(db);
+    res.json(notes);
   });
 
-  // API POST Requests
-  // Below code handles when a user submits a form and thus submits data to the server.
-  // ---------------------------------------------------------------------------
+  // /api/nptes/:id get request
+  // returns note with a specific id
+
+  app.get("/api/notes/:id", function (req, res) {
+    // display json for the notes array indices of the provided id
+    res.json(notes[req.params.id]);
+    console.log("got notes");
+  });
+
+  // /api/notes post request
+  // receive a new note to save on the request body, add it to the db.json file, and then return the new note to the client.
 
   app.post("/api/notes", function (req, res) {
-    // Note the code here. Our "server" will respond to requests and let users know if they have a table or not.
-    // It will do this by sending out the value "true" have a table
-    // req.body is available since we're using the body parsing middleware
-    db.push(req.body);
-    res.json(db);
+    let newNote = req.body;
+    // UUID package ID applied
+    newNote.id = uuidv4();
+    notes.push(newNote);
+    updatedb();
+    res.json(newNote);
   });
 
-  //app.delete???
+  // Delete Request: deletes a note with a specific id
+  app.delete("/api/notes/:id", function (req, res) {
+    notes.splice(req.params.id, 1);
+    updatedb();
+    console.log("Deleted note id " + req.params.id);
+  });
+
+  // updates the db.json whenever a note is added or deleted
+  function updatedb() {
+    fs.writeFile("db/db.json", JSON.stringify(notes, "\t"), (err) => {
+      if (err) throw err;
+      return "notes updated";
+    });
+  }
 };

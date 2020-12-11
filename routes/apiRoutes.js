@@ -47,6 +47,7 @@ module.exports = function (app) {
     notes.splice(req.params.id, 1);
     updatedb();
     console.log("Deleted note id " + req.params.id);
+    res.json(notes);
   });
 
   // updates the db.json whenever a note is added or deleted

@@ -27,7 +27,6 @@ module.exports = function (app) {
   app.get("/api/notes/:id", function (req, res) {
     // display json for the notes array indices of the provided id
     res.json(notes[req.params.id]);
-    console.log("got notes");
   });
 
   // /api/notes post request
@@ -46,7 +45,6 @@ module.exports = function (app) {
   app.delete("/api/notes/:id", function (req, res) {
     notes.splice(req.params.id, 1);
     updatedb();
-    console.log("Deleted note id " + req.params.id);
     res.json(notes);
   });
 
@@ -54,7 +52,7 @@ module.exports = function (app) {
   function updatedb() {
     fs.writeFile("db/db.json", JSON.stringify(notes, "\t"), (err) => {
       if (err) throw err;
-      return "notes updated";
+      return;
     });
   }
 };
